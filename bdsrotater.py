@@ -51,18 +51,18 @@ def umount_usb(backupdisk):
     return
 
 
-def export_bds(nfsclient, bupath, nfsopts):
-    """Export bupath to nfsclient."""
+def export_bds(vaaserver, bupath, nfsopts):
+    """Export bupath to vaaserver."""
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
-    subprocess.check_call([exportfs, '-o', nfsopts, nfsclient + ':' + bupath])
-    logging.debug('Exported %s succesfully to %s', bupath, nfsclient)
+    subprocess.check_call([exportfs, '-o', nfsopts, vaaserver + ':' + bupath])
+    logging.debug('Exported %s succesfully to %s', bupath, vaaserver)
     return
 
 
-def unexport_bds(nfsclient, bupath):
-    """Unexport bupath to nfsclient."""
-    subprocess.check_call([exportfs, '-u', nfsclient + ':' + bupath])
-    logging.debug('Unexported %s succesfully from %s', bupath, nfsclient)
+def unexport_bds(vaaserver, bupath):
+    """Unexport bupath to vaaserver."""
+    subprocess.check_call([exportfs, '-u', vaaserver + ':' + bupath])
+    logging.debug('Unexported %s succesfully from %s', bupath, vaaserver)
     return
 
 
@@ -133,7 +133,6 @@ def start(args):
         if not backupdisk_mounted:
             logging.debug('Attempting to mount %s', args.backupdisk)
             mount_usb(args.backupdisk)
-            #mounted_usb_ok = True
         else:
             logging.debug('%s already mounted', args.backupdisk)
     except (OSError, subprocess.CalledProcessError) as e:
@@ -148,7 +147,7 @@ def start(args):
             cleanup(args.backupdisk)
 
     try:
-        export_bds(args.nfsclient, bupath, args.nfsopts)
+        export_bds(args.vaaserver, bupath, args.nfsopts)
     except (OSError, subprocess.CalledProcessError) as e:
         try:
             raise
@@ -162,10 +161,44 @@ def start(args):
             raise
         finally:
             cleanup(args.backupdisk)
+
     return        
 
+
 def stop(args):
-    print 'Null'
+    viauthtoken = None
+    bupath = os.path.join(args.backupdisk, args.backupdir)
+    username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
+
+    try:
+        viauthtoken = connect_viserver(args.viserver, username, password)
+    except Exception as e:
+        raise
+
+    try:
+        vaa_shutdown(args.vaaname, viauthtoken)
+    except Exception as e:    
+        try:
+            raise
+        finally:
+            # Need to unexport dir before this - how? in context of cleanup?
+            cleanup(args.backupdisk)
+
+    try:
+        unexport_bds(args.vaaserver, bupath)
+    except (OSError, subprocess.CalledProcessError) as e:
+        try:
+            raise
+        finally:
+            cleanup(args.backupdisk)
+
+    try:
+        umount_usb(args.backupdisk)
+    except (OSError, subprocess.CalledProcessError) as e:
+        raise
+
+    return
+
 
 def cleanup(backupdisk):
     """Cleanup log and pass any exceptions from cleanup"""
@@ -190,13 +223,13 @@ def main():
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 
     """Positional arguments."""
-    parser.add_argument('viserver', nargs=1,
+    parser.add_argument('viserver',
         help='vCenter or ESX(i) hostname or IP')
 
-    parser.add_argument('vaaserver', nargs=1,
+    parser.add_argument('vaaserver',
         help='PHD Virtual Backup Archive Appliance hostname or IP')
 
-    parser.add_argument('vaaname', nargs=1,
+    parser.add_argument('vaaname',
         help='PHD Virtual Archive Appliance name in vSphere')
 
     parser.add_argument('process', choices=['start', 'stop'],
@@ -252,7 +285,7 @@ def main():
     logging.basicConfig(
         filename=log_file, format='%(asctime)s %(levelname)s: %(message)s',
         datefmt='%F %H:%M:%S', filemode='w',
-        level=log_level)
+        level=args.log_level)
 
     """Agnostically obtain paths for exes."""
     global rsync, sync, mount, umount, exportfs
@@ -282,7 +315,14 @@ def main():
         try:
             start(args)
             return 0
-        # Catch any unspecified exceptions
+        except Exception as ee:
+            logging.error(ee)
+            return 1
+
+    if args.process == 'stop':
+        try:
+            stop(args)
+            return 0
         except Exception as ee:
             logging.error(ee)
             return 1

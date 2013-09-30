@@ -11,6 +11,8 @@ import logging
 import netrc
 import platform
 import getpass
+from mailer import Mailer
+from mailer import Message
 
 
 class CheckUsbError(Exception):
@@ -214,6 +216,21 @@ def cleanup(backupdisk):
         logging.error(e)
         pass    
 
+
+def body_creator(log_file):
+    body = []
+    for line in open(log_file):
+        body.append(line)
+    return body
+
+
+def relay_email(smtpserver, smtprecipient, smtpsender, smtpsubject, body):
+    b = ''.join(body)
+    message = Message(From=smtpsender, To=smtprecipient, Subject=smtpsubject)
+    message.Body = b
+    sender = Mailer(smtpserver)
+    sender.send(message)
+
   
 def main():
 
@@ -275,6 +292,10 @@ def main():
         help='SMTP server address\ndefault = localhost',
         default='localhost')
 
+    parser.add_argument('-s', '--smtpsubject',
+        help='Email Subject Line\ndefault = Alert!',
+        default='Alert!')
+
     parser.add_argument('-f', '--nfsopts',
         help='nfs export options\ndefault = rw,no_root_squash,async,no_subtree_check',
         default='rw,no_root_squash,async,no_subtree_check')
@@ -314,18 +335,33 @@ def main():
     if args.process == 'start':
         try:
             start(args)
+            # Delete these once tested
+            body = body_creator(log_file)
+            relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
             return 0
         except Exception as ee:
             logging.error(ee)
-            return 1
+            try:
+                body = body_creator(log_file)
+                relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
+            finally:
+                return 1
 
     if args.process == 'stop':
         try:
             stop(args)
+            # Delete these once tested
+            body = body_creator(log_file)
+            relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
             return 0
         except Exception as ee:
             logging.error(ee)
-            return 1
+            try:
+                body = body_creator(log_file)
+                relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
+            finally:
+                return 1
+
 
 
 if __name__ == '__main__':

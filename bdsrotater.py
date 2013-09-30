@@ -189,20 +189,14 @@ def main():
     """Setup argparse."""
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 
-#    parser.add_argument('-s', '--viserver',
-#        help='vCenter or ESX(i) hostname or IP',
-#        required=True)
-#
-#    parser.add_argument('-i', '--vaaserver',
-#        help='PHD Virtual Archive Appliance hostname or IP',
-#        required=True)
-#
-#    parser.add_argument('-a', '--vaaname',
-#        help='PHD Virtual Archive Appliance name in vSphere',
-#        required=True)
-
-    parser.add_argument('viserver',
+    parser.add_argument('viserver', nargs=1,
         help='vCenter or ESX(i) hostname or IP')
+
+    parser.add_argument('vaaserver', nargs=1,
+        help='PHD Virtual Backup Archive Appliance hostname or IP')
+
+    parser.add_argument('vaaname', nargs=1,
+        help='PHD Virtual Archive Appliance name in vSphere')
 
     parser.add_argument('process', choices=['start', 'stop'],
         help='Start: Mounts and exports USB disk then boots VAA\nStop: Shutdown VAA, unexport USB disk and unmount it')

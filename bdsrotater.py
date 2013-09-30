@@ -171,6 +171,7 @@ def start(args):
     try:
         export_bds(args.vaaserver, bupath, args.nfsopts)
     except ExistingExport as e:
+        # Should we run command to reexport/flush if we get this far to ensure nfs is working?
         logging.warning(e)
         result = False
     except (OSError, subprocess.CalledProcessError) as e:
@@ -193,7 +194,7 @@ def start(args):
                 cleanup(args.backupdisk)
 
     if not result:
-        raise Exception('An warning occured during the start process, review the log for information')
+        raise Exception('Warning encounterd during start process!')
     return        
 
 

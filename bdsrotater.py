@@ -189,6 +189,7 @@ def main():
     """Setup argparse."""
     parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
 
+    """Positional arguments."""
     parser.add_argument('viserver', nargs=1,
         help='vCenter or ESX(i) hostname or IP')
 
@@ -201,6 +202,7 @@ def main():
     parser.add_argument('process', choices=['start', 'stop'],
         help='Start: Mounts and exports USB disk then boots VAA\nStop: Shutdown VAA, unexport USB disk and unmount it')
 
+    """Optional arguments."""
     parser.add_argument('-u', '--username',
         help='vCenter or ESX(i) username',
         default=None)
@@ -226,16 +228,18 @@ def main():
         default='INFO',
         choices=['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'])
 
+    whoatnode = getpass.getuser() + '@' + platform.node()
     parser.add_argument('-e', '--smtpsender',
-        help='Sender email address\ndefault = $USER@$HOSTNAME',
-        default=getpass.getuser() + '@' + platform.node())
+        help='Sender email address\ndefault = %s' %(whoatnode),
+        default=whoatnode)
 
+    who = getpass.getuser()
     parser.add_argument('-r', '--smtprecipient',
-        help='Sender email address\ndefault = $USER',
-        default=getpass.getuser())
+        help='Recipient email address\ndefault = %s' %(who),
+        default=who)
 
     parser.add_argument('-t', '--smtpserver',
-        help='Sender email address\ndefault = localhost',
+        help='SMTP server address\ndefault = localhost',
         default='localhost')
 
     parser.add_argument('-f', '--nfsopts',

@@ -21,6 +21,9 @@ class CheckUsbError(Exception):
 class FindExeError(Exception):
     pass
 
+class PowerState(Exception):
+    pass
+
 
 def sync_buffers():
     """Force changed blocks to disk."""
@@ -57,31 +60,32 @@ def export_bds(vaaserver, bupath, nfsopts):
     """Export bupath to vaaserver."""
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
     subprocess.check_call([exportfs, '-o', nfsopts, vaaserver + ':' + bupath])
-    logging.debug('Exported %s succesfully to %s', bupath, vaaserver)
+    logging.debug('Exported %s successfully to %s', bupath, vaaserver)
     return
 
 
 def unexport_bds(vaaserver, bupath):
     """Unexport bupath to vaaserver."""
     subprocess.check_call([exportfs, '-u', vaaserver + ':' + bupath])
-    logging.debug('Unexported %s succesfully from %s', bupath, vaaserver)
+    logging.debug('Unexported %s successfully from %s', bupath, vaaserver)
     return
 
 
 def connect_viserver(viserver, username, password):
     server = VIServer()
     server.connect(viserver, username, password)
-    logging.info('Connected to %s succesfully', viserver)
+    logging.info('Connected to %s successfully', viserver)
     return server
 
 
 def vaa_poweron(vaaname, viauthtoken):
     vaa = viauthtoken.get_vm_by_name(vaaname)
     if vaa.is_powered_on():
-        vaa.reboot_guest()
+        raise PowerState('%s already powered on!', vaaname)
     else:
         if vaa.is_powered_off():
             vaa.power_on()
+            logging.info('%s poweron initiated', vaaname)
     return
 
 
@@ -89,6 +93,9 @@ def vaa_shutdown(vaaname, viauthtoken):
     vaa = viauthtoken.get_vm_by_name(vaaname)
     if vaa.is_powered_on():
         vaa.shutdown_guest()
+        logging.info('%s shutdown initiated', vaaserver)
+    else:
+        raise PowerState('%s was not in powered on state!', vaaserver)
     return
 
 
@@ -124,6 +131,8 @@ def start(args):
     viauthtoken = None
     bupath = os.path.join(args.backupdisk, args.backupdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
+    backupdisk_already_mounted = None
+    result = True
 
     try:
         viauthtoken = connect_viserver(args.viserver, username, password)
@@ -131,12 +140,13 @@ def start(args):
         raise
 
     try:
-        backupdisk_mounted = os.path.ismount(args.backupdisk)
-        if not backupdisk_mounted:
+        backupdisk_already_mounted = os.path.ismount(args.backupdisk)
+        if not backupdisk_already_mounted:
             logging.debug('Attempting to mount %s', args.backupdisk)
             mount_usb(args.backupdisk)
         else:
-            logging.debug('%s already mounted', args.backupdisk)
+            logging.warning('%s already mounted, is this expected?', args.backupdisk)
+            result = False
     except (OSError, subprocess.CalledProcessError) as e:
         raise
 
@@ -146,7 +156,8 @@ def start(args):
         try:
             raise
         finally:
-            cleanup(args.backupdisk)
+            if not backupdisk_already_mounted:
+                cleanup(args.backupdisk)
 
     try:
         export_bds(args.vaaserver, bupath, args.nfsopts)
@@ -154,16 +165,23 @@ def start(args):
         try:
             raise
         finally:
-            cleanup(args.backupdisk)
+            if not backupdisk_already_mounted:
+                cleanup(args.backupdisk)
 
     try:
         vaa_poweron(args.vaaname, viauthtoken)
+    except PowerState as e:
+        logging.warning(e)
+        result = False
     except Exception as e:    
         try:
             raise
         finally:
-            cleanup(args.backupdisk)
+            if not backupdisk_already_mounted:
+                cleanup(args.backupdisk)
 
+    if not result:
+        raise Exception('An warning occured during the start process, review the log for information')
     return        
 
 
@@ -334,6 +352,7 @@ def main():
     
 
     if args.process == 'start':
+        logging.info('Process Action: start')
         try:
             start(args)
             return 0
@@ -348,6 +367,7 @@ def main():
                 return 1
 
     if args.process == 'stop':
+        logging.info('Process Action: stop')
         try:
             stop(args)
             return 0

@@ -166,7 +166,6 @@ def start(args):
             raise
         finally:
             if not backupdisk_already_mounted:
-                print 'triggered by not backupdisk_already_mounted'
                 cleanup(args.backupdisk)
 
     try:

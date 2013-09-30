@@ -2,7 +2,6 @@
 
 from pysphere import VIServer
 from distutils.spawn import find_executable
-from time import sleep
 import os
 import sys
 import subprocess
@@ -14,6 +13,9 @@ import getpass
 from mailer import Mailer
 from mailer import Message
 
+
+class BackupdiskAlreadyMounted(Exception):
+    pass
 
 class CheckUsbError(Exception):
     pass
@@ -37,9 +39,12 @@ def sync_buffers():
 
 def mount_usb(backupdisk):
     """Mount backupdisk."""
-    subprocess.check_call([mount, backupdisk])
-    logging.debug('Mounted %s successfully.', backupdisk)        
-    return
+    if os.path.ismount(backupdisk):
+        raise BackupdiskAlreadyMounted('%s already mounted, is this expected?' %(backupdisk))
+    else:
+        subprocess.check_call([mount, backupdisk])
+        logging.debug('Mounted %s successfully.', backupdisk)        
+        return True
 
 
 def check_usb(bupath):
@@ -147,13 +152,11 @@ def start(args):
         raise
 
     try:
-        backupdisk_already_mounted = os.path.ismount(args.backupdisk)
-        if not backupdisk_already_mounted:
-            logging.debug('Attempting to mount %s', args.backupdisk)
-            mount_usb(args.backupdisk)
-        else:
-            logging.warning('%s already mounted, is this expected?', args.backupdisk)
-            result = False
+        backupdisk_already_mounted = False
+        backupdisk_already_mounted = mount_usb(args.backupdisk)
+    except BackupdiskAlreadyMounted as e:
+        logging.warning(e)
+        result = False
     except (OSError, subprocess.CalledProcessError) as e:
         raise
 
@@ -249,13 +252,12 @@ def body_creator(log_file):
     body = []
     for line in open(log_file):
         body.append(line)
-    return body
+    return ''.join(body)
 
 
 def relay_email(smtpserver, smtprecipient, smtpsender, smtpsubject, body):
-    b = ''.join(body)
     message = Message(From=smtpsender, To=smtprecipient, Subject=smtpsubject)
-    message.Body = b
+    message.Body = body
     sender = Mailer(smtpserver)
     sender.send(message)
 
@@ -338,17 +340,14 @@ def main():
         level=args.log_level)
 
     """Agnostically obtain paths for exes."""
-    global rsync, sync, mount, umount, exportfs, showmount
+    global ync, mount, umount, exportfs, showmount
     ospaths = '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'
-    rsync = find_executable('rsync', path=ospaths)
     sync = find_executable('sync', path=ospaths)
     mount = find_executable('mount', path=ospaths)
     umount = find_executable('umount', path=ospaths)
     exportfs = find_executable('exportfs', path=ospaths)
     showmount = find_executable('showmount', path=ospaths)
     try:
-        if not rsync:
-            raise FindExeError('rsync executable not found, is it installed?')
         if not exportfs:
             raise FindExeError('exportfs executable not found, is it installed?')
         if not showmount:

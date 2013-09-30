@@ -44,7 +44,7 @@ def mount_usb(backupdisk):
     else:
         subprocess.check_call([mount, backupdisk])
         logging.debug('Mounted %s successfully.', backupdisk)        
-        return True
+        return False
 
 
 def check_usb(bupath):
@@ -143,7 +143,6 @@ def start(args):
     viauthtoken = None
     bupath = os.path.join(args.backupdisk, args.backupdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
-    backupdisk_already_mounted = None
     result = True
 
     try:
@@ -152,7 +151,7 @@ def start(args):
         raise
 
     try:
-        backupdisk_already_mounted = False
+        backupdisk_already_mounted = True
         backupdisk_already_mounted = mount_usb(args.backupdisk)
     except BackupdiskAlreadyMounted as e:
         logging.warning(e)
@@ -167,6 +166,7 @@ def start(args):
             raise
         finally:
             if not backupdisk_already_mounted:
+                print 'triggered by not backupdisk_already_mounted'
                 cleanup(args.backupdisk)
 
     try:
@@ -340,7 +340,7 @@ def main():
         level=args.log_level)
 
     """Agnostically obtain paths for exes."""
-    global ync, mount, umount, exportfs, showmount
+    global sync, mount, umount, exportfs, showmount
     ospaths = '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'
     sync = find_executable('sync', path=ospaths)
     mount = find_executable('mount', path=ospaths)

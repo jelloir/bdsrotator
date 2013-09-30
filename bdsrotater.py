@@ -292,9 +292,10 @@ def main():
         help='SMTP server address\ndefault = localhost',
         default='localhost')
 
+    host = platform.node()
     parser.add_argument('-s', '--smtpsubject',
-        help='Email Subject Line\ndefault = Alert!',
-        default='Alert!')
+        help='Email Subject Line\ndefault = Alert! BDSROTATOR on %s encountered an error' %(host),
+        default='Alert! BDSROTATOR on %s encountered an error' %(host))
 
     parser.add_argument('-f', '--nfsopts',
         help='nfs export options\ndefault = rw,no_root_squash,async,no_subtree_check',
@@ -335,33 +336,30 @@ def main():
     if args.process == 'start':
         try:
             start(args)
-            # Delete these once tested
-            body = body_creator(log_file)
-            relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
             return 0
         except Exception as ee:
             logging.error(ee)
             try:
                 body = body_creator(log_file)
                 relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
+            except Exception as emailerr:
+                logging.error(emailerr)
             finally:
                 return 1
 
     if args.process == 'stop':
         try:
             stop(args)
-            # Delete these once tested
-            body = body_creator(log_file)
-            relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
             return 0
         except Exception as ee:
             logging.error(ee)
             try:
                 body = body_creator(log_file)
                 relay_email(args.smtpserver, args.smtprecipient, args.smtpsender, args.smtpsubject, body)
+            except Exception as emailerr:
+                logging.error(emailerr)
             finally:
                 return 1
-
 
 
 if __name__ == '__main__':

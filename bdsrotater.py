@@ -24,6 +24,9 @@ class FindExeError(Exception):
 class PowerState(Exception):
     pass
 
+class ExistingExport(Exception):
+    pass
+
 
 def sync_buffers():
     """Force changed blocks to disk."""
@@ -58,6 +61,10 @@ def umount_usb(backupdisk):
 
 def export_bds(vaaserver, bupath, nfsopts):
     """Export bupath to vaaserver."""
+    nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
+    for item in nfsmounts:
+        if item.startswith(bupath):
+            raise ExistingExport('%s is already exported according to showmount' %(bupath))
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
     subprocess.check_call([exportfs, '-o', nfsopts, vaaserver + ':' + bupath])
     logging.debug('Exported %s successfully to %s', bupath, vaaserver)
@@ -81,7 +88,7 @@ def connect_viserver(viserver, username, password):
 def vaa_poweron(vaaname, viauthtoken):
     vaa = viauthtoken.get_vm_by_name(vaaname)
     if vaa.is_powered_on():
-        raise PowerState('%s already powered on!', vaaname)
+        raise PowerState('%s already powered on!' %(vaaname))
     else:
         if vaa.is_powered_off():
             vaa.power_on()
@@ -161,6 +168,9 @@ def start(args):
 
     try:
         export_bds(args.vaaserver, bupath, args.nfsopts)
+    except ExistingExport as e:
+        logging.warning(e)
+        result = False
     except (OSError, subprocess.CalledProcessError) as e:
         try:
             raise
@@ -328,18 +338,21 @@ def main():
         level=args.log_level)
 
     """Agnostically obtain paths for exes."""
-    global rsync, sync, mount, umount, exportfs
+    global rsync, sync, mount, umount, exportfs, showmount
     ospaths = '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'
     rsync = find_executable('rsync', path=ospaths)
     sync = find_executable('sync', path=ospaths)
     mount = find_executable('mount', path=ospaths)
     umount = find_executable('umount', path=ospaths)
     exportfs = find_executable('exportfs', path=ospaths)
+    showmount = find_executable('showmount', path=ospaths)
     try:
         if not rsync:
             raise FindExeError('rsync executable not found, is it installed?')
         if not exportfs:
             raise FindExeError('exportfs executable not found, is it installed?')
+        if not showmount:
+            raise FindExeError('showmount executable not found, is it installed?')
         if not sync:
             raise FindExeError('sync executable not found.')
         if not mount:

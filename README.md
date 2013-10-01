@@ -13,7 +13,7 @@ VBABACKUPS folder and powers on the VBA.
 Conversely, when issued **_stop_** it shuts down the VBA, unexports the
 VBABACKUPS folder and un-mounts the removable disk.
 It will email alerts on failures.
-It has only been tested on Debian 7 (Wheezy) with USB3 Removable disk.
+It has only been tested on Debian 7 (Wheezy) with USB3 Removable disks.
 
 Prerequisites
 -------------

@@ -45,8 +45,15 @@ In `/etc/fstab` you can then create a mount point for all the disks e.g.
 
     /dev/backupdisk /mnt/backup ext4 rw,noauto,noatime,nodiratime,data=writeback 0 0
 
+#### Python Modules
 
+On Debian Wheezy you will need the following Python Packages.
 
+    apt-get install python-pip python-mailer python2.7
+
+Once installed you also need pysphere which can be installed as follows
+
+    pip install -U pysphere
 
 Installation
 ------------

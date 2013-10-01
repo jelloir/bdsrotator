@@ -128,6 +128,7 @@ a netrc file.  To use a netrc file create it as follows:
 
     editor ~/.netrc
 
+
     machine vcenter.example.local
         login vbadmin
         password mypassword

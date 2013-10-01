@@ -26,9 +26,10 @@ The options I use when formatting are:
 
     mkfs.ext4 /dev/sdxx -E lazy_itable_init=0 -m 0.4 -O ^has_journal
 
-The removable disks need to have `/etc/fstab` entries the simplest way to
-do this by creating a consistent device node with udev.  Replace `$DISK`
-variable with your removable disk.
+The removable disks need to have `/etc/fstab` entries.  The simplest way
+to do this by creating a consistent device node with udev as follows:
+
+Replace the `$DISK` variable with your removable disk.
     
     DISK=/dev/sdx
     echo "SUBSYSTEM==\"block\", $(udevadm info -a -p $(udevadm info -q path -n $DISK) | grep ATTRS{serial} | head -n 1 | sed 's/    //'), KERNEL==\"sd?1\", SYMLINK+=\"backupdisk\", GROUP=\"BACKUP\"" >> /etc/udev/rules.d/10-backup-disk.rules

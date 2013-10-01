@@ -166,7 +166,16 @@ def start(args):
             raise
         finally:
             if not backupdisk_already_mounted:
-                cleanup(args.backupdisk)
+                try:
+                    sync_buffers()
+                except Exception as sync_buffers_e:
+                    logging.error(sync_buffers_e)
+                    pass
+                try:
+                    umount_usb(args.backupdisk)
+                except Exception as umount_usb_e:
+                    logging.error(umount_usb_e)
+                    pass    
 
     try:
         export_bds(args.vaaserver, bupath, args.nfsopts)
@@ -179,7 +188,16 @@ def start(args):
             raise
         finally:
             if not backupdisk_already_mounted:
-                cleanup(args.backupdisk)
+                try:
+                    sync_buffers()
+                except Exception as sync_buffers_e:
+                    logging.error(sync_buffers_e)
+                    pass
+                try:
+                    umount_usb(args.backupdisk)
+                except Exception as umount_usb_e:
+                    logging.error(umount_usb_e)
+                    pass    
 
     try:
         vaa_poweron(args.vaaname, viauthtoken)
@@ -191,8 +209,21 @@ def start(args):
             raise
         finally:
             if not backupdisk_already_mounted:
-                # need to unexport NFS here is fails.
-                cleanup(args.backupdisk)
+                try:
+                    unexport_bds(args.vaaserver, bupath)
+                except Exception as unexport_bds_e:
+                    logging.error(unexport_bds_e)
+                    pass
+                try:
+                    sync_buffers()
+                except Exception as sync_buffers_e:
+                    logging.error(sync_buffers_e)
+                    pass
+                try:
+                    umount_usb(args.backupdisk)
+                except Exception as umount_usb_e:
+                    logging.error(umount_usb_e)
+                    pass
 
     if not result:
         raise Exception('Warning encounterd during start process!')
@@ -203,6 +234,7 @@ def stop(args):
     viauthtoken = None
     bupath = os.path.join(args.backupdisk, args.backupdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
+    result = True
 
     try:
         viauthtoken = connect_viserver(args.viserver, username, password)
@@ -215,13 +247,22 @@ def stop(args):
         try:
             raise
         finally:
-            # not sure about this...
+            logging.warning('VBA shutdown error! Attempting cleanup.')
             try:
                 unexport_bds(args.vaaserver, bupath)
-            except:
+            except Exception as unexport_bds_e:
+                logging.error(unexport_bds_e)
                 pass
-            finally:
-                cleanup(args.backupdisk)
+            try:
+                sync_buffers()
+            except Exception as sync_buffers_e:
+                logging.error(sync_buffers_e)
+                pass
+            try:
+                umount_usb(args.backupdisk)
+            except Exception as umount_usb_e:
+                logging.error(umount_usb_e)
+                pass    
 
     try:
         unexport_bds(args.vaaserver, bupath)
@@ -229,7 +270,23 @@ def stop(args):
         try:
             raise
         finally:
-            cleanup(args.backupdisk)
+            """If Unexport fails we still attempt cleanup."""
+            try:
+                sync_buffers()
+            except Exception as sync_buffers_e:
+                logging.error(sync_buffers_e)
+                pass
+            try:
+                umount_usb(args.backupdisk)
+            except Exception as umount_usb_e:
+                logging.error(umount_usb_e)
+                pass    
+
+    try:
+        sync_buffer(s)
+    except Exception as e:
+        logging.error(e)
+        pass
 
     try:
         umount_usb(args.backupdisk)
@@ -237,21 +294,6 @@ def stop(args):
         raise
 
     return
-
-
-def cleanup(backupdisk):
-    """Cleanup log and pass any exceptions from cleanup"""
-    try:
-        sync_buffers()
-    except Exception as e:
-        logging.error(e)
-        pass
-
-    try:
-        umount_usb(backupdisk)
-    except Exception as e:
-        logging.error(e)
-        pass    
 
 
 def body_creator(log_file):
@@ -331,7 +373,7 @@ def main():
     host = platform.node()
     parser.add_argument('-s', '--smtpsubject',
         help='Email Subject',
-        default='Alert! BDSROTATOR on %s encountered an error' %(host))
+        default='bdsrotator on %s encountered an error' %(host))
 
     parser.add_argument('-f', '--nfsopts',
         help='nfs export options',

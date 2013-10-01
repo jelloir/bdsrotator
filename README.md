@@ -123,6 +123,15 @@ Review the help and pay attention to the defaults:
 Example Usage
 -------------
 
+The script will prompt for a username and/or password in the absense of
+a netrc file.  To use a netrc file create it as follows:
+
+    editor ~/.netrc
+
+    machine vcenter.example.local
+        login vbadmin
+        password mypassword
+
 To mount a disk, export it via NFS to the VBA Archive VM and boot the
 VBA Archive VM in it's simplest form:
 

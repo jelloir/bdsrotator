@@ -49,7 +49,8 @@ In `/etc/fstab` you can then create a mount point for all the disks e.g.
 #### VBABACKUPS Folder
 
 A dedicated **VBABACKUPS** folder must exist on the root of each
-removeable disk.
+removeable disk.  You can customise this but will need to use the
+`--backupdir` argument when running the script.
 
     mkdir /mnt/backup/VBABACKUPS
 

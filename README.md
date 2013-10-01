@@ -130,7 +130,7 @@ VBA Archive VM in it's simplest form:
 
 And to perform the opposite...
 
-    bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
+    bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop
   
 Schedules
 ---------

@@ -8,9 +8,9 @@ Introduction
 ------------
 This script was designed to be run on a Linux NFS server with the
 backups disk attached.
-When issued "start" the script mounts the removable disk, exports the
+When issued **_start_** the script mounts the removable disk, exports the
 VBABACKUPS folder and powers on the VBA.
-Conversely, when issued "stop" it shuts down the VBA, unexports the
+Conversely, when issued **_stop_** it shuts down the VBA, unexports the
 VBABACKUPS folder and un-mounts the removable disk.
 It has only been tested on Debian 7 (Wheezy) with USB3 Removable disk.
 

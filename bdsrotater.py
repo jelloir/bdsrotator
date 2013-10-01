@@ -273,17 +273,17 @@ def main():
     log_file = '/var/log/vaactl.log'
 
     """Setup argparse."""
-    parser = argparse.ArgumentParser(formatter_class=argparse.RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     """Positional arguments."""
     parser.add_argument('viserver',
         help='vCenter or ESX(i) hostname or IP')
 
     parser.add_argument('vaaserver',
-        help='PHD Virtual Backup Archive Appliance hostname or IP')
+        help='PHD Archive VBA hostname or IP')
 
     parser.add_argument('vaaname',
-        help='PHD Virtual Archive Appliance name in vSphere')
+        help='PHD Archive VBA name in vSphere')
 
     parser.add_argument('process', choices=['start', 'stop'],
         help='Start: Mounts and exports USB disk then boots VAA\nStop: Shutdown VAA, unexport USB disk and unmount it')
@@ -298,15 +298,15 @@ def main():
         default=None)
 
     parser.add_argument('-d', '--backupdisk',
-        help='Backup disk mount point\ndefault = /mnt/backup',
+        help='Backup disk mount point',
         default='/mnt/backup')
 
     parser.add_argument('-n', '--netrcfile',
-        help='Specify location of netrc file\ndefault = ~/.netrc',
+        help='Specify location of netrc file',
         default='~/.netrc')
 
     parser.add_argument('-b', '--backupdir',
-        help='Backup directory on root of backupdisk\ndefault = VBABACKUPS',
+        help='Backup directory on root of backupdisk',
         default='VBABACKUPS')
 
     parser.add_argument('-l', '--log-level',
@@ -316,25 +316,25 @@ def main():
 
     whoatnode = getpass.getuser() + '@' + platform.node()
     parser.add_argument('-e', '--smtpsender',
-        help='Sender email address\ndefault = %s' %(whoatnode),
+        help='Sender email address',
         default=whoatnode)
 
     who = getpass.getuser()
     parser.add_argument('-r', '--smtprecipient',
-        help='Recipient email address\ndefault = %s' %(who),
+        help='Recipient email address',
         default=who)
 
     parser.add_argument('-t', '--smtpserver',
-        help='SMTP server address\ndefault = localhost',
+        help='SMTP server address',
         default='localhost')
 
     host = platform.node()
     parser.add_argument('-s', '--smtpsubject',
-        help='Email Subject Line\ndefault = Alert! BDSROTATOR on %s encountered an error' %(host),
+        help='Email Subject',
         default='Alert! BDSROTATOR on %s encountered an error' %(host))
 
     parser.add_argument('-f', '--nfsopts',
-        help='nfs export options\ndefault = rw,no_root_squash,async,no_subtree_check',
+        help='nfs export options',
         default='rw,no_root_squash,async,no_subtree_check')
 
     """Create variables from argparse."""

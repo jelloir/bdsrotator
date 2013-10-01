@@ -67,3 +67,50 @@ Review the help:
 
     bdsrotator.py --help
 
+    usage: bdsrotater.py [-h] [-u USERNAME] [-p PASSWORD] [-d BACKUPDISK]
+                         [-n NETRCFILE] [-b BACKUPDIR]
+                         [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-e SMTPSENDER]
+                         [-r SMTPRECIPIENT] [-t SMTPSERVER] [-s SMTPSUBJECT]
+                         [-f NFSOPTS]
+                         viserver vaaserver vaaname {start,stop}
+    
+    positional arguments:
+      viserver              vCenter or ESX(i) hostname or IP
+      vaaserver             PHD Archive VBA hostname or IP
+      vaaname               PHD Archive VBA name in vSphere
+      {start,stop}          Start: Mounts and exports USB disk then boots VAA
+                            Stop: Shutdown VAA, unexport USB disk and unmount it
+    
+    optional arguments:
+      -h, --help            show this help message and exit
+      -u USERNAME, --username USERNAME
+                            vCenter or ESX(i) username (default: None)
+      -p PASSWORD, --password PASSWORD
+                            vCenter or ESX(i) password (default: None)
+      -d BACKUPDISK, --backupdisk BACKUPDISK
+                            Backup disk mount point (default: /mnt/backup)
+      -n NETRCFILE, --netrcfile NETRCFILE
+                            Specify location of netrc file (default: ~/.netrc)
+      -b BACKUPDIR, --backupdir BACKUPDIR
+                            Backup directory on root of backupdisk (default:
+                            VBABACKUPS)
+      -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
+                            set logging level (default: INFO)
+      -e SMTPSENDER, --smtpsender SMTPSENDER
+                            Sender email address (default:
+                            root@nmiavicnas02.nautilus.local)
+      -r SMTPRECIPIENT, --smtprecipient SMTPRECIPIENT
+                            Recipient email address (default: root)
+      -t SMTPSERVER, --smtpserver SMTPSERVER
+                            SMTP server address (default: localhost)
+      -s SMTPSUBJECT, --smtpsubject SMTPSUBJECT
+                            Email Subject (default: bdsrotator on
+                            nmiavicnas02.nautilus.local encountered an error)
+      -f NFSOPTS, --nfsopts NFSOPTS
+                            nfs export options (default:
+                            rw,no_root_squash,async,no_subtree_check)
+
+Example Usage
+-------------
+
+

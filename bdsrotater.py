@@ -107,7 +107,7 @@ def vaa_shutdown(vaaname, viauthtoken):
         vaa.shutdown_guest()
         logging.info('%s shutdown initiated', vaaname)
     else:
-        raise PowerState('%s was not in powered on state!', vaaname)
+        raise PowerState('%s was not in powered on state!' %(vaaname))
     return
 
 

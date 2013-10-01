@@ -7,7 +7,7 @@ hold a PHD Virtual Backup Appliance Archive block de-duplication store.
 Introduction
 ------------
 This script was designed to be run on a Linux NFS server with the
-backups disk attached.
+removeable disk attached.
 When issued **_start_** the script mounts the removable disk, exports the
 VBABACKUPS folder and powers on the VBA.
 Conversely, when issued **_stop_** it shuts down the VBA, unexports the

@@ -1,4 +1,4 @@
-bdsrotater
+bdsrotator
 ==========
 
 A Python module for managing a rotation of removable backup disks that
@@ -70,14 +70,14 @@ Installation
 
 Download and place the script in your path and make executable, e.g.
 
-     wget -O /usr/local/bin/bdsrotator.py "https://raw.github.com/jelloir/bdsrotater/master/bdsrotater.py"
+     wget -O /usr/local/bin/bdsrotator.py "https://raw.github.com/jelloir/bdsrotater/master/bdsrotator.py"
      chmod +x /usr/local/bin/bdsrotator.py
 
 Review the help and pay attention to the defaults:
 
     bdsrotator.py --help
 
-    usage: bdsrotater.py [-h] [-u USERNAME] [-p PASSWORD] [-d BACKUPDISK]
+    usage: bdsrotator.py [-h] [-u USERNAME] [-p PASSWORD] [-d BACKUPDISK]
                          [-n NETRCFILE] [-b BACKUPDIR]
                          [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-e SMTPSENDER]
                          [-r SMTPRECIPIENT] [-t SMTPSERVER] [-s SMTPSUBJECT]
@@ -135,11 +135,11 @@ a netrc file.  To use a netrc file create it as follows:
 To mount a disk, export it via NFS to the VBA Archive VM and boot the
 VBA Archive VM in it's simplest form:
 
-    bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
+    bdsrotator.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
 
 And to perform the opposite...
 
-    bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop
+    bdsrotator.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop
 
 VBA Configuration
 -----------------
@@ -155,5 +155,5 @@ Schedules
 I create a crontab entry to start at 18:00 each Mon-Fri and stop at
 09:00 each Mon-Fri.  e.g.
 
-    00 09  *   *   1,2,3,4,5 /usr/local/bin/bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop 
-    00 18  *   *   1,2,3,4,5 /usr/local/bin/bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start
+    00 09  *   *   1,2,3,4,5 /usr/local/bin/bdsrotator.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop 
+    00 18  *   *   1,2,3,4,5 /usr/local/bin/bdsrotator.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start

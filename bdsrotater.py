@@ -325,7 +325,7 @@ def relay_email(smtpserver, smtprecipient, smtpsender, smtpsubject, body):
   
 def main():
 
-    log_file = '/var/log/bdsrotater.log'
+    log_file = '/var/log/bdsrotator.log'
 
     """Setup argparse."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

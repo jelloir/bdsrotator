@@ -131,6 +131,14 @@ VBA Archive VM in it's simplest form:
 And to perform the opposite...
 
     bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop
+
+VBA Configuration
+-----------------
+
+You will need to prepare a disk and issue a start to bdsrotator.py then
+configure the VBA Archive BDS using the the NFS export path .e.g.
+
+    192.168.1.1:/mnt/backup/VBABACKUPS
   
 Schedules
 ---------

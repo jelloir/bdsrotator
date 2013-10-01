@@ -147,4 +147,4 @@ I create a crontab entry to start at 18:00 each Mon-Fri and stop at
 09:00 each Mon-Fri.  e.g.
 
     00 09  *   *   1,2,3,4,5 /usr/local/bin/bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop 
-    00 18  *   *   1,2,3,4,5 /usr/local/bin/bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE stop
+    00 18  *   *   1,2,3,4,5 /usr/local/bin/bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start

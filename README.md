@@ -58,5 +58,12 @@ Once installed you also need pysphere which can be installed as follows
 Installation
 ------------
 
-Download and place the script in your path.
+Download and place the script in your path and make executable, e.g.
+
+     wget -O /usr/local/bin/bdsrotator.py "https://raw.github.com/jelloir/bdsrotater/master/bdsrotater.py"
+     chmod +x /usr/local/bin/bdsrotator.py
+
+Review the help:
+
+    bdsrotator.py --help
 

@@ -191,6 +191,7 @@ def start(args):
             raise
         finally:
             if not backupdisk_already_mounted:
+                # need to unexport NFS here is fails.
                 cleanup(args.backupdisk)
 
     if not result:
@@ -214,8 +215,13 @@ def stop(args):
         try:
             raise
         finally:
-            # Need to unexport dir before this - how? in context of cleanup?
-            cleanup(args.backupdisk)
+            # not sure about this...
+            try:
+                unexport_bds(args.vaaserver, bupath)
+            except:
+                pass
+            finally:
+                cleanup(args.backupdisk)
 
     try:
         unexport_bds(args.vaaserver, bupath)

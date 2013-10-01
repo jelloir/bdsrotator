@@ -208,6 +208,7 @@ def start(args):
         try:
             raise
         finally:
+            logging.warning('VBA poweron error! Attempting cleanup.')
             if not backupdisk_already_mounted:
                 try:
                     unexport_bds(args.vaaserver, bupath)
@@ -224,9 +225,16 @@ def start(args):
                 except Exception as umount_usb_e:
                     logging.error(umount_usb_e)
                     pass
+            else:
+                try:
+                    unexport_bds(args.vaaserver, bupath)
+                except Exception as unexport_bds_e:
+                    logging.error(unexport_bds_e)
+                    pass
+                
 
     if not result:
-        raise Exception('Warning encounterd during start process!')
+        raise Exception('Warning encountered during start process!')
     return        
 
 
@@ -243,6 +251,9 @@ def stop(args):
 
     try:
         vaa_shutdown(args.vaaname, viauthtoken)
+    except PowerState as e:
+        logging.warning(e)
+        result = False        
     except Exception as e:    
         try:
             raise
@@ -293,6 +304,8 @@ def stop(args):
     except (OSError, subprocess.CalledProcessError) as e:
         raise
 
+    if not result:
+        raise Exception('Warning encountered during stop process!')
     return
 
 
@@ -312,7 +325,7 @@ def relay_email(smtpserver, smtprecipient, smtpsender, smtpsubject, body):
   
 def main():
 
-    log_file = '/var/log/vaactl.log'
+    log_file = '/var/log/bdsrotater.log'
 
     """Setup argparse."""
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)

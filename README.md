@@ -124,9 +124,9 @@ Example Usage
 To mount a disk, export it via NFS to the VBA Archive VM and boot the
 VBA Archive VM in it's simplest form:
 
-   bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
+    bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
 
 And to perform the opposite...
 
-   bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
+    bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
   

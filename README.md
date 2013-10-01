@@ -16,6 +16,9 @@ It has only been tested on Debian 7 (Wheezy) with USB3 Removable disk.
 
 Prerequisites
 -------------
+
+#### Udev Rules For Removeable Disks
+
 Partition and format the removable disks with EXT4 (other file systems
 are untested).
 The options I use when formatting are:

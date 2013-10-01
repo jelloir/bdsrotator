@@ -12,6 +12,7 @@ When issued **_start_** the script mounts the removable disk, exports the
 VBABACKUPS folder and powers on the VBA.
 Conversely, when issued **_stop_** it shuts down the VBA, unexports the
 VBABACKUPS folder and un-mounts the removable disk.
+It will email alerts on failures.
 It has only been tested on Debian 7 (Wheezy) with USB3 Removable disk.
 
 Prerequisites
@@ -45,6 +46,13 @@ In `/etc/fstab` you can then create a mount point for all the disks e.g.
 
     /dev/backupdisk /mnt/backup ext4 rw,noauto,noatime,nodiratime,data=writeback 0 0
 
+#### VBABACKUPS Folder
+
+A dedicated **VBABACKUPS** folder must exist on the root of each
+removeable disk.
+
+    mkdir /mnt/backup/VBABACKUPS
+
 #### Python Modules
 
 On Debian Wheezy you will need the following Python Packages.
@@ -63,7 +71,7 @@ Download and place the script in your path and make executable, e.g.
      wget -O /usr/local/bin/bdsrotator.py "https://raw.github.com/jelloir/bdsrotater/master/bdsrotater.py"
      chmod +x /usr/local/bin/bdsrotator.py
 
-Review the help:
+Review the help and pay attention to the :
 
     bdsrotator.py --help
 
@@ -113,4 +121,12 @@ Review the help:
 Example Usage
 -------------
 
+To mount a disk, export it via NFS to the VBA Archive VM and boot the
+VBA Archive VM in it's simplest form:
 
+   bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
+
+And to perform the opposite...
+
+   bdsrotater.py vcenter.example.local phdvbaarchive.example.local PHDVBAARCHIVE start 
+  

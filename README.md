@@ -18,6 +18,7 @@ Prerequisites
 -------------
 The removable disks need to have /etc/fstab entries the simplest way to
 do this by creating a consistent device node with udev.
+    
     DISK=/dev/sdx
     echo "SUBSYSTEM==\"block\", $(udevadm info -a -p $(udevadm info -q path -n $DISK) | grep ATTRS{serial} | head -n 1 | sed 's/    //'), KERNEL==\"sd?1\", SYMLINK+=\"backupdisk\", GROUP=\"BACKUP\"" >> /etc/udev/rules.d/10-backup-disk.rules
 

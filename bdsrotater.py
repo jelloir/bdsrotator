@@ -294,7 +294,7 @@ def stop(args):
                 pass    
 
     try:
-        sync_buffer(s)
+        sync_buffers()
     except Exception as e:
         logging.error(e)
         pass

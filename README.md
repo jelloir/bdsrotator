@@ -75,22 +75,21 @@ Download and place the script in your path and make executable, e.g.
 
 Review the help and pay attention to the defaults:
 
-    bdsrotator.py --help
-
     usage: bdsrotator.py [-h] [-u USERNAME] [-p PASSWORD] [-d BACKUPDISK]
                          [-n NETRCFILE] [-b BACKUPDIR]
                          [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-e SMTPSENDER]
                          [-r SMTPRECIPIENT] [-t SMTPSERVER] [-s SMTPSUBJECT]
                          [-f NFSOPTS]
-                         viserver vaaserver vaaname {start,stop}
-    
+                         viserver avbaserver avbaname {start,stop}
+
     positional arguments:
       viserver              vCenter or ESX(i) hostname or IP
-      vaaserver             PHD Archive VBA hostname or IP
-      vaaname               PHD Archive VBA name in vSphere
-      {start,stop}          Start: Mounts and exports USB disk then boots VAA
-                            Stop: Shutdown VAA, unexport USB disk and unmount it
-    
+      avbaserver            PHD Archive VBA hostname or IP
+      avbaname              PHD Archive VBA name in vSphere
+      {start,stop}          Start: Mount and export removeable disk then boot
+                            Archive VBA | Stop: Shutdown Archive VBA, unexport
+                            removeable disk and unmount it
+
     optional arguments:
       -h, --help            show this help message and exit
       -u USERNAME, --username USERNAME
@@ -108,14 +107,14 @@ Review the help and pay attention to the defaults:
                             set logging level (default: INFO)
       -e SMTPSENDER, --smtpsender SMTPSENDER
                             Sender email address (default:
-                            root@phdvbaarchive.example.local)
+                            root@nmiavicnas02.nautilus.local)
       -r SMTPRECIPIENT, --smtprecipient SMTPRECIPIENT
                             Recipient email address (default: root)
       -t SMTPSERVER, --smtpserver SMTPSERVER
                             SMTP server address (default: localhost)
       -s SMTPSUBJECT, --smtpsubject SMTPSUBJECT
                             Email Subject (default: bdsrotator on
-                            phdvbaarchive.example.local encountered an error)
+                            nmiavicnas02.nautilus.local encountered an error)
       -f NFSOPTS, --nfsopts NFSOPTS
                             nfs export options (default:
                             rw,no_root_squash,async,no_subtree_check)

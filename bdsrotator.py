@@ -49,7 +49,7 @@ def mnt_removeable(backupdisk):
 
 
 def check_bds(bdspath):
-    """Test backupdir exists and is rw on backupdisk."""
+    """Test bdsdir exists and is rw on backupdisk."""
     if not os.path.isdir(bdspath):
         raise CheckBDSError('%s not found.' %(bdspath))
     if not os.access(bdspath, os.W_OK|os.R_OK):
@@ -145,7 +145,7 @@ def get_credentials(username, password, netrcfile, viserver):
 
 def start(args):
     viauthtoken = None
-    bdspath = os.path.join(args.backupdisk, args.backupdir)
+    bdspath = os.path.join(args.backupdisk, args.bdsdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
     result = True
 
@@ -243,7 +243,7 @@ def start(args):
 
 def stop(args):
     viauthtoken = None
-    bdspath = os.path.join(args.backupdisk, args.backupdir)
+    bdspath = os.path.join(args.backupdisk, args.bdsdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
     result = True
 
@@ -363,8 +363,8 @@ def main():
         help='Specify location of netrc file',
         default='~/.netrc')
 
-    parser.add_argument('-b', '--backupdir',
-        help='Backup directory on root of backupdisk',
+    parser.add_argument('-b', '--bdsdir',
+        help='BDS directory on root of backupdisk',
         default='VBABACKUPS')
 
     parser.add_argument('-l', '--log-level',

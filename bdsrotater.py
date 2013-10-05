@@ -10,6 +10,7 @@ import logging
 import netrc
 import platform
 import getpass
+import traceback
 from mailer import Mailer
 from mailer import Message
 
@@ -421,6 +422,7 @@ def main():
             raise FindExeError('umount executable not found.')
     except FindExeError as e:
         logging.error(e)
+        traceback.print_exc()
         return 1
     
 
@@ -437,6 +439,7 @@ def main():
             except Exception as emailerr:
                 logging.error(emailerr)
             finally:
+                traceback.print_exc()
                 return 1
 
     if args.process == 'stop':
@@ -452,6 +455,7 @@ def main():
             except Exception as emailerr:
                 logging.error(emailerr)
             finally:
+                traceback.print_exc()
                 return 1
 
 

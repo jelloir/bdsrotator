@@ -49,7 +49,7 @@ def mount_usb(backupdisk):
 
 
 def check_usb(bupath):
-    """Test backupdir exists and is rw on backupdisk."""
+    """Test bupath exists and is rw on backupdisk."""
     if not os.path.isdir(bupath):
         raise CheckUsbError('%s not found.' %(bupath))
     if not os.access(bupath, os.W_OK|os.R_OK):
@@ -85,6 +85,7 @@ def unexport_bds(vaaserver, bupath):
 
 
 def connect_viserver(viserver, username, password):
+    """Connect to viserver and return viauthtoken"""
     server = VIServer()
     server.connect(viserver, username, password)
     logging.info('Connected to %s successfully', viserver)
@@ -92,6 +93,7 @@ def connect_viserver(viserver, username, password):
 
 
 def vaa_poweron(vaaname, viauthtoken):
+    """Poweron Archive VBA"""
     vaa = viauthtoken.get_vm_by_name(vaaname)
     if vaa.is_powered_on():
         raise PowerState('%s already powered on!' %(vaaname))
@@ -103,6 +105,7 @@ def vaa_poweron(vaaname, viauthtoken):
 
 
 def vaa_shutdown(vaaname, viauthtoken):
+    """Shutdown Archive VBA"""
     vaa = viauthtoken.get_vm_by_name(vaaname)
     if vaa.is_powered_on():
         vaa.shutdown_guest()
@@ -114,7 +117,7 @@ def vaa_shutdown(vaaname, viauthtoken):
 
 def get_credentials(username, password, netrcfile, viserver):
     """
-    Return username and password if set else prompt for username or
+    Returns username and password if set else prompts for username or
     password if one set without the other else use netrc else prompt for
     username and password.
     """

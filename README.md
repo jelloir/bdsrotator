@@ -70,7 +70,7 @@ Installation
 
 Download and place the script in your path and make executable, e.g.
 
-     wget -O /usr/local/bin/bdsrotator.py "https://raw.github.com/jelloir/bdsrotater/master/bdsrotater.py"
+     wget -O /usr/local/bin/bdsrotator.py "https://raw.github.com/jelloir/bdsrotater/master/bdsrotator.py"
      chmod +x /usr/local/bin/bdsrotator.py
 
 Review the help and pay attention to the defaults:

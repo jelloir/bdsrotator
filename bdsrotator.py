@@ -48,12 +48,12 @@ def mnt_removeable(backupdisk):
         return False
 
 
-def check_dest(bupath):
+def check_dest(bdspath):
     """Test backupdir exists and is rw on backupdisk."""
-    if not os.path.isdir(bupath):
-        raise CheckDestError('%s not found.' %(bupath))
-    if not os.access(bupath, os.W_OK|os.R_OK):
-        raise CheckDestError('%s is not writeable.' %(bupath))
+    if not os.path.isdir(bdspath):
+        raise CheckDestError('%s not found.' %(bdspath))
+    if not os.access(bdspath, os.W_OK|os.R_OK):
+        raise CheckDestError('%s is not writeable.' %(bdspath))
     logging.debug('Backup disk validation passed.')
     return
 
@@ -65,22 +65,22 @@ def unmnt_removeable(backupdisk):
     return
 
 
-def export_bds(avbaserver, bupath, nfsopts):
-    """Export bupath to avbaserver."""
+def export_bds(avbaserver, bdspath, nfsopts):
+    """Export bdspath to avbaserver."""
     nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     for item in nfsmounts:
-        if item.startswith(bupath):
-            raise ExistingExport('%s is already exported according to showmount' %(bupath))
+        if item.startswith(bdspath):
+            raise ExistingExport('%s is already exported according to showmount' %(bdspath))
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
-    subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bupath])
-    logging.debug('Exported %s successfully to %s', bupath, avbaserver)
+    subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
+    logging.debug('Exported %s successfully to %s', bdspath, avbaserver)
     return
 
 
-def unexport_bds(avbaserver, bupath):
-    """Unexport bupath to avbaserver."""
-    subprocess.check_call([exportfs, '-u', avbaserver + ':' + bupath])
-    logging.debug('Unexported %s successfully from %s', bupath, avbaserver)
+def unexport_bds(avbaserver, bdspath):
+    """Unexport bdspath to avbaserver."""
+    subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
+    logging.debug('Unexported %s successfully from %s', bdspath, avbaserver)
     return
 
 
@@ -145,7 +145,7 @@ def get_credentials(username, password, netrcfile, viserver):
 
 def start(args):
     viauthtoken = None
-    bupath = os.path.join(args.backupdisk, args.backupdir)
+    bdspath = os.path.join(args.backupdisk, args.backupdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
     result = True
 
@@ -164,7 +164,7 @@ def start(args):
         raise
 
     try:
-        check_dest(bupath)
+        check_dest(bdspath)
     except (OSError, CheckDestError) as e:
         try:
             raise
@@ -182,7 +182,7 @@ def start(args):
                     pass    
 
     try:
-        export_bds(args.avbaserver, bupath, args.nfsopts)
+        export_bds(args.avbaserver, bdspath, args.nfsopts)
     except ExistingExport as e:
         # Should we run command to reexport/flush if we get this far to ensure nfs is working?
         logging.warning(e)
@@ -215,7 +215,7 @@ def start(args):
             logging.warning('VBA poweron error! Attempting cleanup.')
             if not backupdisk_already_mounted:
                 try:
-                    unexport_bds(args.avbaserver, bupath)
+                    unexport_bds(args.avbaserver, bdspath)
                 except Exception as unexport_bds_e:
                     logging.error(unexport_bds_e)
                     pass
@@ -231,7 +231,7 @@ def start(args):
                     pass
             else:
                 try:
-                    unexport_bds(args.avbaserver, bupath)
+                    unexport_bds(args.avbaserver, bdspath)
                 except Exception as unexport_bds_e:
                     logging.error(unexport_bds_e)
                     pass
@@ -244,7 +244,7 @@ def start(args):
 
 def stop(args):
     viauthtoken = None
-    bupath = os.path.join(args.backupdisk, args.backupdir)
+    bdspath = os.path.join(args.backupdisk, args.backupdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)
     result = True
 
@@ -264,7 +264,7 @@ def stop(args):
         finally:
             logging.warning('VBA shutdown error! Attempting cleanup.')
             try:
-                unexport_bds(args.avbaserver, bupath)
+                unexport_bds(args.avbaserver, bdspath)
             except Exception as unexport_bds_e:
                 logging.error(unexport_bds_e)
                 pass
@@ -280,7 +280,7 @@ def stop(args):
                 pass    
 
     try:
-        unexport_bds(args.avbaserver, bupath)
+        unexport_bds(args.avbaserver, bdspath)
     except (OSError, subprocess.CalledProcessError) as e:
         try:
             raise

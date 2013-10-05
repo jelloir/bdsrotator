@@ -235,7 +235,6 @@ def start(args):
                 except Exception as unexport_bds_e:
                     logging.error(unexport_bds_e)
                     pass
-                
 
     if not result:
         raise Exception('Warning encountered during start process!')

@@ -65,22 +65,22 @@ def unmnt_removeable(backupdisk):
     return
 
 
-def export_bds(vaaserver, bupath, nfsopts):
-    """Export bupath to vaaserver."""
+def export_bds(avbaserver, bupath, nfsopts):
+    """Export bupath to avbaserver."""
     nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     for item in nfsmounts:
         if item.startswith(bupath):
             raise ExistingExport('%s is already exported according to showmount' %(bupath))
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
-    subprocess.check_call([exportfs, '-o', nfsopts, vaaserver + ':' + bupath])
-    logging.debug('Exported %s successfully to %s', bupath, vaaserver)
+    subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bupath])
+    logging.debug('Exported %s successfully to %s', bupath, avbaserver)
     return
 
 
-def unexport_bds(vaaserver, bupath):
-    """Unexport bupath to vaaserver."""
-    subprocess.check_call([exportfs, '-u', vaaserver + ':' + bupath])
-    logging.debug('Unexported %s successfully from %s', bupath, vaaserver)
+def unexport_bds(avbaserver, bupath):
+    """Unexport bupath to avbaserver."""
+    subprocess.check_call([exportfs, '-u', avbaserver + ':' + bupath])
+    logging.debug('Unexported %s successfully from %s', bupath, avbaserver)
     return
 
 
@@ -92,26 +92,26 @@ def connect_viserver(viserver, username, password):
     return server
 
 
-def vaa_poweron(vaaname, viauthtoken):
+def avba_poweron(avbaname, viauthtoken):
     """Poweron Archive VBA"""
-    vaa = viauthtoken.get_vm_by_name(vaaname)
-    if vaa.is_powered_on():
-        raise PowerState('%s already powered on!' %(vaaname))
+    avba = viauthtoken.get_vm_by_name(avbaname)
+    if avba.is_powered_on():
+        raise PowerState('%s already powered on!' %(avbaname))
     else:
-        if vaa.is_powered_off():
-            vaa.power_on()
-            logging.info('%s poweron initiated', vaaname)
+        if avba.is_powered_off():
+            avba.power_on()
+            logging.info('%s poweron initiated', avbaname)
     return
 
 
-def vaa_shutdown(vaaname, viauthtoken):
+def avba_shutdown(avbaname, viauthtoken):
     """Shutdown Archive VBA"""
-    vaa = viauthtoken.get_vm_by_name(vaaname)
-    if vaa.is_powered_on():
-        vaa.shutdown_guest()
-        logging.info('%s shutdown initiated', vaaname)
+    avba = viauthtoken.get_vm_by_name(avbaname)
+    if avba.is_powered_on():
+        avba.shutdown_guest()
+        logging.info('%s shutdown initiated', avbaname)
     else:
-        raise PowerState('%s was not in powered on state!' %(vaaname))
+        raise PowerState('%s was not in powered on state!' %(avbaname))
     return
 
 
@@ -182,7 +182,7 @@ def start(args):
                     pass    
 
     try:
-        export_bds(args.vaaserver, bupath, args.nfsopts)
+        export_bds(args.avbaserver, bupath, args.nfsopts)
     except ExistingExport as e:
         # Should we run command to reexport/flush if we get this far to ensure nfs is working?
         logging.warning(e)
@@ -204,7 +204,7 @@ def start(args):
                     pass    
 
     try:
-        vaa_poweron(args.vaaname, viauthtoken)
+        avba_poweron(args.avbaname, viauthtoken)
     except PowerState as e:
         logging.warning(e)
         result = False
@@ -215,7 +215,7 @@ def start(args):
             logging.warning('VBA poweron error! Attempting cleanup.')
             if not backupdisk_already_mounted:
                 try:
-                    unexport_bds(args.vaaserver, bupath)
+                    unexport_bds(args.avbaserver, bupath)
                 except Exception as unexport_bds_e:
                     logging.error(unexport_bds_e)
                     pass
@@ -231,7 +231,7 @@ def start(args):
                     pass
             else:
                 try:
-                    unexport_bds(args.vaaserver, bupath)
+                    unexport_bds(args.avbaserver, bupath)
                 except Exception as unexport_bds_e:
                     logging.error(unexport_bds_e)
                     pass
@@ -254,7 +254,7 @@ def stop(args):
         raise
 
     try:
-        vaa_shutdown(args.vaaname, viauthtoken)
+        avba_shutdown(args.avbaname, viauthtoken)
     except PowerState as e:
         logging.warning(e)
         result = False        
@@ -264,7 +264,7 @@ def stop(args):
         finally:
             logging.warning('VBA shutdown error! Attempting cleanup.')
             try:
-                unexport_bds(args.vaaserver, bupath)
+                unexport_bds(args.avbaserver, bupath)
             except Exception as unexport_bds_e:
                 logging.error(unexport_bds_e)
                 pass
@@ -280,7 +280,7 @@ def stop(args):
                 pass    
 
     try:
-        unexport_bds(args.vaaserver, bupath)
+        unexport_bds(args.avbaserver, bupath)
     except (OSError, subprocess.CalledProcessError) as e:
         try:
             raise
@@ -338,14 +338,14 @@ def main():
     parser.add_argument('viserver',
         help='vCenter or ESX(i) hostname or IP')
 
-    parser.add_argument('vaaserver',
+    parser.add_argument('avbaserver',
         help='PHD Archive VBA hostname or IP')
 
-    parser.add_argument('vaaname',
+    parser.add_argument('avbaname',
         help='PHD Archive VBA name in vSphere')
 
     parser.add_argument('process', choices=['start', 'stop'],
-        help='Start: Mounts and exports USB disk then boots VAA\nStop: Shutdown VAA, unexport USB disk and unmount it')
+        help='Start: Mounts and exports USB disk then boots Archive VBA\nStop: Shutdown Archive VBA, unexport USB disk and unmount it')
 
     """Optional arguments."""
     parser.add_argument('-u', '--username',

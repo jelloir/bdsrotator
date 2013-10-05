@@ -18,7 +18,7 @@ from pysphere import VIServer
 class BackupdiskAlreadyMounted(Exception):
     pass
 
-class CheckUsbError(Exception):
+class CheckDestError(Exception):
     pass
 
 class FindExeError(Exception):
@@ -51,9 +51,9 @@ def mnt_removeable(backupdisk):
 def check_dest(bupath):
     """Test backupdir exists and is rw on backupdisk."""
     if not os.path.isdir(bupath):
-        raise CheckUsbError('%s not found.' %(bupath))
+        raise CheckDestError('%s not found.' %(bupath))
     if not os.access(bupath, os.W_OK|os.R_OK):
-        raise CheckUsbError('%s is not writeable.' %(bupath))
+        raise CheckDestError('%s is not writeable.' %(bupath))
     logging.debug('Backup disk validation passed.')
     return
 
@@ -165,7 +165,7 @@ def start(args):
 
     try:
         check_dest(bupath)
-    except (OSError, CheckUsbError) as e:
+    except (OSError, CheckDestError) as e:
         try:
             raise
         finally:

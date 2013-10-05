@@ -76,7 +76,7 @@ Download and place the script in your path and make executable, e.g.
 Review the help and pay attention to the defaults:
 
     usage: bdsrotator.py [-h] [-u USERNAME] [-p PASSWORD] [-d BACKUPDISK]
-                         [-n NETRCFILE] [-b BACKUPDIR]
+                         [-n NETRCFILE] [-b BDSDIR]
                          [-l {DEBUG,INFO,WARNING,ERROR,CRITICAL}] [-e SMTPSENDER]
                          [-r SMTPRECIPIENT] [-t SMTPSERVER] [-s SMTPSUBJECT]
                          [-f NFSOPTS]
@@ -100,8 +100,8 @@ Review the help and pay attention to the defaults:
                             Backup disk mount point (default: /mnt/backup)
       -n NETRCFILE, --netrcfile NETRCFILE
                             Specify location of netrc file (default: ~/.netrc)
-      -b BACKUPDIR, --backupdir BACKUPDIR
-                            Backup directory on root of backupdisk (default:
+      -b BDSDIR, --bdsdir BDSDIR
+                            BDS directory on root of backupdisk (default:
                             VBABACKUPS)
       -l {DEBUG,INFO,WARNING,ERROR,CRITICAL}, --log-level {DEBUG,INFO,WARNING,ERROR,CRITICAL}
                             set logging level (default: INFO)
@@ -118,6 +118,7 @@ Review the help and pay attention to the defaults:
       -f NFSOPTS, --nfsopts NFSOPTS
                             nfs export options (default:
                             rw,no_root_squash,async,no_subtree_check)
+
 
 Example Usage
 -------------

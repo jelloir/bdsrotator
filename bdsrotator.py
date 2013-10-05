@@ -345,7 +345,7 @@ def main():
         help='PHD Archive VBA name in vSphere')
 
     parser.add_argument('process', choices=['start', 'stop'],
-        help='Start: Mounts and exports USB disk then boots Archive VBA\nStop: Shutdown Archive VBA, unexport USB disk and unmount it')
+        help='Start: Mounts and exports USB disk then boots Archive VBA | Stop: Shutdown Archive VBA, unexport USB disk and unmount it')
 
     """Optional arguments."""
     parser.add_argument('-u', '--username',

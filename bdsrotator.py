@@ -48,7 +48,7 @@ def mnt_removeable(backupdisk):
         return False
 
 
-def check_removeable(bupath):
+def check_dest(bupath):
     """Test backupdir exists and is rw on backupdisk."""
     if not os.path.isdir(bupath):
         raise CheckUsbError('%s not found.' %(bupath))
@@ -164,7 +164,7 @@ def start(args):
         raise
 
     try:
-        check_removeable(bupath)
+        check_dest(bupath)
     except (OSError, CheckUsbError) as e:
         try:
             raise

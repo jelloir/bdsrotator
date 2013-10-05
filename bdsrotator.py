@@ -38,7 +38,7 @@ def sync_buffers():
     return
 
 
-def mount_usb(backupdisk):
+def mnt_removeable(backupdisk):
     """Mount backupdisk."""
     if os.path.ismount(backupdisk):
         raise BackupdiskAlreadyMounted('%s already mounted, is this expected?' %(backupdisk))
@@ -48,8 +48,8 @@ def mount_usb(backupdisk):
         return False
 
 
-def check_usb(bupath):
-    """Test bupath exists and is rw on backupdisk."""
+def check_removeable(bupath):
+    """Test backupdir exists and is rw on backupdisk."""
     if not os.path.isdir(bupath):
         raise CheckUsbError('%s not found.' %(bupath))
     if not os.access(bupath, os.W_OK|os.R_OK):
@@ -156,7 +156,7 @@ def start(args):
 
     try:
         backupdisk_already_mounted = True
-        backupdisk_already_mounted = mount_usb(args.backupdisk)
+        backupdisk_already_mounted = mnt_removeable(args.backupdisk)
     except BackupdiskAlreadyMounted as e:
         logging.warning(e)
         result = False
@@ -164,7 +164,7 @@ def start(args):
         raise
 
     try:
-        check_usb(bupath)
+        check_removeable(bupath)
     except (OSError, CheckUsbError) as e:
         try:
             raise

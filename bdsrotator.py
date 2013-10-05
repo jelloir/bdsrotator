@@ -1,18 +1,18 @@
 #!/usr/bin/env python
 
-from pysphere import VIServer
-from distutils.spawn import find_executable
-import os
-import sys
-import subprocess
 import argparse
+import getpass
 import logging
 import netrc
+import os
 import platform
-import getpass
+import subprocess
+import sys
 import traceback
+from distutils.spawn import find_executable
 from mailer import Mailer
 from mailer import Message
+from pysphere import VIServer
 
 
 class BackupdiskAlreadyMounted(Exception):
@@ -58,7 +58,7 @@ def check_usb(bupath):
     return
 
 
-def umount_usb(backupdisk):
+def unmnt_removeable(backupdisk):
     """Unmount backupdisk."""
     subprocess.check_call([umount, backupdisk])
     logging.debug('Unmounted %s successfully.', backupdisk)
@@ -176,9 +176,9 @@ def start(args):
                     logging.error(sync_buffers_e)
                     pass
                 try:
-                    umount_usb(args.backupdisk)
-                except Exception as umount_usb_e:
-                    logging.error(umount_usb_e)
+                    unmnt_removeable(args.backupdisk)
+                except Exception as unmnt_removeable_e:
+                    logging.error(unmnt_removeable_e)
                     pass    
 
     try:
@@ -198,9 +198,9 @@ def start(args):
                     logging.error(sync_buffers_e)
                     pass
                 try:
-                    umount_usb(args.backupdisk)
-                except Exception as umount_usb_e:
-                    logging.error(umount_usb_e)
+                    unmnt_removeable(args.backupdisk)
+                except Exception as unmnt_removeable_e:
+                    logging.error(unmnt_removeable_e)
                     pass    
 
     try:
@@ -225,9 +225,9 @@ def start(args):
                     logging.error(sync_buffers_e)
                     pass
                 try:
-                    umount_usb(args.backupdisk)
-                except Exception as umount_usb_e:
-                    logging.error(umount_usb_e)
+                    unmnt_removeable(args.backupdisk)
+                except Exception as unmnt_removeable_e:
+                    logging.error(unmnt_removeable_e)
                     pass
             else:
                 try:
@@ -274,9 +274,9 @@ def stop(args):
                 logging.error(sync_buffers_e)
                 pass
             try:
-                umount_usb(args.backupdisk)
-            except Exception as umount_usb_e:
-                logging.error(umount_usb_e)
+                unmnt_removeable(args.backupdisk)
+            except Exception as unmnt_removeable_e:
+                logging.error(unmnt_removeable_e)
                 pass    
 
     try:
@@ -292,9 +292,9 @@ def stop(args):
                 logging.error(sync_buffers_e)
                 pass
             try:
-                umount_usb(args.backupdisk)
-            except Exception as umount_usb_e:
-                logging.error(umount_usb_e)
+                unmnt_removeable(args.backupdisk)
+            except Exception as unmnt_removeable_e:
+                logging.error(unmnt_removeable_e)
                 pass    
 
     try:
@@ -304,7 +304,7 @@ def stop(args):
         pass
 
     try:
-        umount_usb(args.backupdisk)
+        unmnt_removeable(args.backupdisk)
     except (OSError, subprocess.CalledProcessError) as e:
         raise
 

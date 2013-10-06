@@ -15,7 +15,7 @@ from mailer import Message
 from pysphere import VIServer
 
 
-class BackupdiskAlreadyMounted(Exception):
+class BackupDiskMntState(Exception):
     pass
 
 class CheckBDSError(Exception):
@@ -41,7 +41,7 @@ def sync_buffers():
 def mnt_removeable(backupdisk):
     """Mount backupdisk."""
     if os.path.ismount(backupdisk):
-        raise BackupdiskAlreadyMounted('%s already mounted, is this expected?' %(backupdisk))
+        raise BackupDiskMntState('%s already mounted, is this expected?' %(backupdisk))
     else:
         subprocess.check_call([mount, backupdisk])
         logging.debug('Mounted %s successfully.', backupdisk)        
@@ -61,7 +61,7 @@ def check_bds(bdspath):
 def unmnt_removeable(backupdisk):
     """Unmount backupdisk."""
     if not os.path.ismount(backupdisk):
-        raise BackupdiskAlreadyMounted('%s not mounted, is this expected?' %(backupdisk))
+        raise BackupDiskMntState('%s not mounted, is this expected?' %(backupdisk))
     else:
         subprocess.check_call([umount, backupdisk])
         logging.debug('Unmounted %s successfully.', backupdisk)
@@ -73,7 +73,7 @@ def export_bds(avbaserver, bdspath, nfsopts):
     nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     for item in nfsmounts:
         if item.startswith(bdspath):
-            raise ExistingExport('%s is already exported according to showmount' %(bdspath))
+            raise ExistingExport('%s is already exported according to showmount!' %(bdspath))
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
     subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
     logging.debug('Exported %s successfully to %s', bdspath, avbaserver)
@@ -82,6 +82,10 @@ def export_bds(avbaserver, bdspath, nfsopts):
 
 def unexport_bds(avbaserver, bdspath):
     """Unexport bdspath to avbaserver."""
+    nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
+    for item in nfsmounts:
+        if not item.startswith(bdspath):
+            raise ExistingExport('%s not exported according to showmount!' %(bdspath))
     subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
     logging.debug('Unexported %s successfully from %s', bdspath, avbaserver)
     return
@@ -160,7 +164,7 @@ def start(args):
     try:
         backupdisk_already_mounted = True
         backupdisk_already_mounted = mnt_removeable(args.backupdisk)
-    except BackupdiskAlreadyMounted as e:
+    except BackupDiskMntState as e:
         logging.warning(e)
         result = False
     except (OSError, subprocess.CalledProcessError) as e:
@@ -283,6 +287,9 @@ def stop(args):
 
     try:
         unexport_bds(args.avbaserver, bdspath)
+    except ExistingExport as e:
+        logging.warning(e)
+        result = False
     except (OSError, subprocess.CalledProcessError) as e:
         try:
             raise
@@ -307,7 +314,7 @@ def stop(args):
 
     try:
         unmnt_removeable(args.backupdisk)
-    except BackupdiskAlreadyMounted as e:
+    except BackupDiskMntState as e:
         logging.warning(e)
         result = False
     except (OSError, subprocess.CalledProcessError) as e:

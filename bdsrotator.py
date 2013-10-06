@@ -60,10 +60,12 @@ def check_bds(bdspath):
 
 def unmnt_removeable(backupdisk):
     """Unmount backupdisk."""
-    # Perhaps add check for os.path.ismount which will assist with cleanup processes?
-    subprocess.check_call([umount, backupdisk])
-    logging.debug('Unmounted %s successfully.', backupdisk)
-    return
+    if not os.path.ismount(backupdisk):
+        raise BackupdiskAlreadyMounted('%s not mounted, is this expected?' %(backupdisk))
+    else:
+        subprocess.check_call([umount, backupdisk])
+        logging.debug('Unmounted %s successfully.', backupdisk)
+        return
 
 
 def export_bds(avbaserver, bdspath, nfsopts):
@@ -305,10 +307,12 @@ def stop(args):
 
     try:
         unmnt_removeable(args.backupdisk)
+    except BackupdiskAlreadyMounted as e:
+        logging.warning(e)
+        result = False
     except (OSError, subprocess.CalledProcessError) as e:
         raise
 
-    # if vba powered off and backup disk unmounted this never gets triggered - see note in unmnt_removeable
     if not result:
         raise Exception('Warning encountered during stop process!')
     return

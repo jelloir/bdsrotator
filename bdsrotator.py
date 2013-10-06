@@ -70,26 +70,29 @@ def unmnt_removeable(backupdisk):
 
 def export_bds(avbaserver, bdspath, nfsopts):
     """Export bdspath to avbaserver."""
-    nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
-    for item in nfsmounts:
-        if item.startswith(bdspath):
-            raise ExistingExport('%s is already exported according to showmount!' %(bdspath))
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
-    subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
-    logging.info('Exported %s successfully to %s', bdspath, avbaserver)
-    return
+    n = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
+    nfsmounts = [ x.split() for x in n ]
+    for item in nfsmounts:
+        if item[0] == bdspath:
+            raise ExistingExport('%s is already exported according to showmount -e!' %(bdspath))
+    else:
+        subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
+        logging.info('Exported %s successfully to %s', bdspath, avbaserver)
+        return
 
 
 def unexport_bds(avbaserver, bdspath):
     """Unexport bdspath to avbaserver."""
-    nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
+    n = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
+    nfsmounts = [ x.split() for x in n ]
     for item in nfsmounts:
-        if item.startswith(bdspath):
+        if item[0] == bdspath:
             subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
             logging.info('Unexported %s successfully from %s', bdspath, avbaserver)
             return
-        else:
-            raise ExistingExport('%s not exported according to showmount!' %(bdspath))
+    else:
+        raise ExistingExport('%s not exported according to showmount -e!' %(bdspath))
 
 
 def connect_viserver(viserver, username, password):

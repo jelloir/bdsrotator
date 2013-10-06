@@ -59,13 +59,28 @@ def check_bds(bdspath):
 
 
 def unmnt_removeable(backupdisk):
-    """Unmount backupdisk."""
+    """
+    Unmount backupdisk and retry upon failures which can occur when
+    backupdisk is suspended and nfs still retains locks on disk even
+    though showmount etc. all appear fine.
+    """
+    unmount_success = False
+    retry = 5
     if not os.path.ismount(backupdisk):
         raise BackupDiskMntState('%s not mounted, is this expected?' %(backupdisk))
     else:
-        subprocess.check_call([umount, backupdisk])
-        logging.info('Unmounted %s successfully.', backupdisk)
-        return
+        while not unmount_success:
+            try:
+                subprocess.check_call([umount, backupdisk])
+                logging.info('Unmounted %s successfully.', backupdisk)
+                return
+            except subprocess.CalledProcessError as e:
+                logging.warning(e)
+                retry = retry - 1
+                if retry == 0:
+                    raise
+                time.sleep(20)
+                pass
 
 
 def export_bds(avbaserver, bdspath, nfsopts):

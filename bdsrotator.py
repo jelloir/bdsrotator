@@ -34,7 +34,7 @@ class ExistingExport(Exception):
 def sync_buffers():
     """Force changed blocks to disk."""
     subprocess.check_call(sync)
-    logging.debug('Sync buffers successful.')
+    logging.info('Sync buffers successful.')
     return
 
 
@@ -44,7 +44,7 @@ def mnt_removeable(backupdisk):
         raise BackupDiskMntState('%s already mounted, is this expected?' %(backupdisk))
     else:
         subprocess.check_call([mount, backupdisk])
-        logging.debug('Mounted %s successfully.', backupdisk)        
+        logging.info('Mounted %s successfully.', backupdisk)        
         return False
 
 
@@ -54,7 +54,7 @@ def check_bds(bdspath):
         raise CheckBDSError('%s not found.' %(bdspath))
     if not os.access(bdspath, os.W_OK|os.R_OK):
         raise CheckBDSError('%s is not writeable.' %(bdspath))
-    logging.debug('Backup disk validation passed.')
+    logging.info('Backup disk validation passed.')
     return
 
 
@@ -64,7 +64,7 @@ def unmnt_removeable(backupdisk):
         raise BackupDiskMntState('%s not mounted, is this expected?' %(backupdisk))
     else:
         subprocess.check_call([umount, backupdisk])
-        logging.debug('Unmounted %s successfully.', backupdisk)
+        logging.info('Unmounted %s successfully.', backupdisk)
         return
 
 
@@ -76,7 +76,7 @@ def export_bds(avbaserver, bdspath, nfsopts):
             raise ExistingExport('%s is already exported according to showmount!' %(bdspath))
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
     subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
-    logging.debug('Exported %s successfully to %s', bdspath, avbaserver)
+    logging.info('Exported %s successfully to %s', bdspath, avbaserver)
     return
 
 
@@ -87,7 +87,7 @@ def unexport_bds(avbaserver, bdspath):
         if not item.startswith(bdspath):
             raise ExistingExport('%s not exported according to showmount!' %(bdspath))
     subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
-    logging.debug('Unexported %s successfully from %s', bdspath, avbaserver)
+    logging.info('Unexported %s successfully from %s', bdspath, avbaserver)
     return
 
 

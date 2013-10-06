@@ -84,11 +84,12 @@ def unexport_bds(avbaserver, bdspath):
     """Unexport bdspath to avbaserver."""
     nfsmounts = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     for item in nfsmounts:
-        if not item.startswith(bdspath):
+        if item.startswith(bdspath):
+            subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
+            logging.info('Unexported %s successfully from %s', bdspath, avbaserver)
+            return
+        else:
             raise ExistingExport('%s not exported according to showmount!' %(bdspath))
-    subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
-    logging.info('Unexported %s successfully from %s', bdspath, avbaserver)
-    return
 
 
 def connect_viserver(viserver, username, password):

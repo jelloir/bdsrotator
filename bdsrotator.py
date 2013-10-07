@@ -8,6 +8,7 @@ import os
 import platform
 import subprocess
 import sys
+import time
 import traceback
 from distutils.spawn import find_executable
 from mailer import Mailer

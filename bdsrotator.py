@@ -80,7 +80,7 @@ def unmnt_removeable(backupdisk):
                 retry = retry - 1
                 if retry == 0:
                     raise
-                time.sleep(20)
+                time.sleep(60)
                 pass
 
 

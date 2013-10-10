@@ -81,7 +81,7 @@ Review the help and pay attention to the defaults:
                          [-r SMTPRECIPIENT] [-t SMTPSERVER] [-s SMTPSUBJECT]
                          [-f NFSOPTS]
                          viserver avbaserver avbaname {start,stop}
-
+    
     positional arguments:
       viserver              vCenter or ESX(i) hostname or IP
       avbaserver            PHD Archive VBA hostname or IP
@@ -89,7 +89,7 @@ Review the help and pay attention to the defaults:
       {start,stop}          Start: Mount and export removeable disk then boot
                             Archive VBA | Stop: Shutdown Archive VBA, unexport
                             removeable disk and unmount it
-
+    
     optional arguments:
       -h, --help            show this help message and exit
       -u USERNAME, --username USERNAME
@@ -109,7 +109,8 @@ Review the help and pay attention to the defaults:
                             Sender email address (default:
                             root@nmiavicnas02.nautilus.local)
       -r SMTPRECIPIENT, --smtprecipient SMTPRECIPIENT
-                            Recipient email address (default: root)
+                            Recipient email address, separate multiple recipients
+                            with a comma (default: root)
       -t SMTPSERVER, --smtpserver SMTPSERVER
                             SMTP server address (default: localhost)
       -s SMTPSUBJECT, --smtpsubject SMTPSUBJECT
@@ -118,7 +119,6 @@ Review the help and pay attention to the defaults:
       -f NFSOPTS, --nfsopts NFSOPTS
                             nfs export options (default:
                             rw,no_root_squash,async,no_subtree_check)
-
 
 Example Usage
 -------------

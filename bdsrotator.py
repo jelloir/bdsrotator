@@ -353,7 +353,7 @@ def body_creator(log_file):
 
 
 def relay_email(smtpserver, smtprecipient, smtpsender, smtpsubject, body):
-    message = Message(From=smtpsender, To=smtprecipient, Subject=smtpsubject)
+    message = Message(From=smtpsender, To=smtprecipient.split(','), Subject=smtpsubject)
     message.Body = body
     sender = Mailer(smtpserver)
     sender.send(message)
@@ -412,7 +412,7 @@ def main():
 
     who = getpass.getuser()
     parser.add_argument('-r', '--smtprecipient',
-        help='Recipient email address',
+        help='Recipient email address, separate multiple recipients with a comma',
         default=who)
 
     parser.add_argument('-t', '--smtpserver',

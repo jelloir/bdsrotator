@@ -107,7 +107,7 @@ Review the help and pay attention to the defaults:
                             set logging level (default: INFO)
       -e SMTPSENDER, --smtpsender SMTPSENDER
                             Sender email address (default:
-                            root@nmiavicnas02.nautilus.local)
+                            root@nfsserver.example.local)
       -r SMTPRECIPIENT, --smtprecipient SMTPRECIPIENT
                             Recipient email address, separate multiple recipients
                             with a comma (default: root)
@@ -115,7 +115,7 @@ Review the help and pay attention to the defaults:
                             SMTP server address (default: localhost)
       -s SMTPSUBJECT, --smtpsubject SMTPSUBJECT
                             Email Subject (default: bdsrotator on
-                            nmiavicnas02.nautilus.local encountered an error)
+                            nfsserver.example.local encountered an error)
       -f NFSOPTS, --nfsopts NFSOPTS
                             nfs export options (default:
                             rw,no_root_squash,async,no_subtree_check)

@@ -44,9 +44,9 @@ def wakeup_removeable(backupdisk):
     dev = None
     for line in open('/proc/mounts'):
         if line.split()[1] == backupdisk:
-        dev = line.split()[0]
-        subprocess.check_call([sg_start, dev])
-        break
+            dev = line.split()[0]
+            subprocess.check_call([sg_start, dev])
+            break
     return
 
 

@@ -39,6 +39,17 @@ def sync_buffers():
     return
 
 
+def wakeup_removeable(backupdisk):
+    """Wake up backupdisk"""
+    dev = None
+    for line in open('/proc/mounts'):
+        if line.split()[1] == backupdisk:
+        dev = line.split()[0]
+        subprocess.check_call([sg_start, dev])
+        break
+    return
+
+
 def mnt_removeable(backupdisk):
     """Mount backupdisk."""
     if os.path.ismount(backupdisk):
@@ -72,6 +83,7 @@ def unmnt_removeable(backupdisk):
     else:
         while not unmount_success:
             try:
+                wakeup_removeable(backupdisk)
                 subprocess.check_call([umount, backupdisk])
                 logging.info('Unmounted %s successfully.', backupdisk)
                 return
@@ -437,22 +449,25 @@ def main():
         level=args.log_level)
 
     """Agnostically obtain paths for exes."""
-    global sync, mount, umount, exportfs, showmount
+    global exportfs, mount, sg_start, showmount, sync, umount
     ospaths = '/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin'
-    sync = find_executable('sync', path=ospaths)
-    mount = find_executable('mount', path=ospaths)
-    umount = find_executable('umount', path=ospaths)
     exportfs = find_executable('exportfs', path=ospaths)
+    mount = find_executable('mount', path=ospaths)
+    sg_start = find_executable('sg_start', path=ospaths)
     showmount = find_executable('showmount', path=ospaths)
+    sync = find_executable('sync', path=ospaths)
+    umount = find_executable('umount', path=ospaths)
     try:
         if not exportfs:
             raise FindExeError('exportfs executable not found, is it installed?')
+        if not mount:
+            raise FindExeError('mount executable not found.')
+        if not sg_start:
+            raise FindExeError('sg_mount executable not found, is it installed?')
         if not showmount:
             raise FindExeError('showmount executable not found, is it installed?')
         if not sync:
             raise FindExeError('sync executable not found.')
-        if not mount:
-            raise FindExeError('mount executable not found.')
         if not umount:
             raise FindExeError('umount executable not found.')
     except FindExeError as e:

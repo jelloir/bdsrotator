@@ -46,6 +46,7 @@ def wakeup_removeable(backupdisk):
         if line.split()[1] == backupdisk:
             dev = line.split()[0]
             subprocess.check_call([sg_start, dev])
+            logging.info('sg_start told %s to wake up and have a coffee', dev)
             break
     return
 

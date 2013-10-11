@@ -45,8 +45,8 @@ def wakeup_removeable(backupdisk):
     for line in open('/proc/mounts'):
         if line.split()[1] == backupdisk:
             dev = line.split()[0]
-            subprocess.check_call([sg_start, dev])
-            logging.info('sg_start told %s to wake up and have a coffee', dev)
+            subprocess.check_call([sg_start, '--start', dev])
+            logging.info('sg_start told %s to wake up.', dev)
             break
     return
 
@@ -84,6 +84,8 @@ def unmnt_removeable(backupdisk):
     else:
         while not unmount_success:
             try:
+                # may need to put this in stop function alone?  Or
+                # before unexport_bds?
                 wakeup_removeable(backupdisk)
                 subprocess.check_call([umount, backupdisk])
                 logging.info('Unmounted %s successfully.', backupdisk)

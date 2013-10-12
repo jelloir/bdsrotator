@@ -117,12 +117,14 @@ def export_bds(avbaserver, bdspath, nfsopts):
 
 def unexport_bds(avbaserver, bdspath):
     """Unexport BDS path to Archive VBA."""
+    secs = 30
     n = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     nfsmounts = [ x.split() for x in n ]
     for item in nfsmounts:
         if item[0] == bdspath:
             """Give the VBA some time to shutdown before unexporting bds."""
-            time.sleep(30)
+            logging.info('Sleeping %s seconds before unexporting BDS', secs)
+            time.sleep(secs)
             subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
             logging.info('Unexported %s successfully from %s', bdspath, avbaserver)
             return

@@ -40,10 +40,7 @@ def sync_buffers():
 
 
 def wakeup_removeable(backupdisk):
-    """
-    Try to wake up backupdisk using sg_start if it has gone to sleep.
-    Doesn't seem to help on WD USB3 disks.
-    """
+    """Try to wake up removeable disk if it has gone to sleep."""
     dev = None
     for line in open('/proc/mounts'):
         if line.split()[1] == backupdisk:
@@ -55,7 +52,7 @@ def wakeup_removeable(backupdisk):
 
 
 def mnt_removeable(backupdisk):
-    """Mount backupdisk."""
+    """Mount removeable disk."""
     if os.path.ismount(backupdisk):
         raise BackupDiskMntState('%s already mounted, is this expected?' %(backupdisk))
     else:
@@ -65,7 +62,7 @@ def mnt_removeable(backupdisk):
 
 
 def check_bds(bdspath):
-    """Test bdsdir exists and is rw on backupdisk."""
+    """Test BDS dir exists and is rw on removeable disk."""
     if not os.path.isdir(bdspath):
         raise CheckBDSError('%s not found.' %(bdspath))
     if not os.access(bdspath, os.W_OK|os.R_OK):
@@ -77,9 +74,7 @@ def check_bds(bdspath):
 def unmnt_removeable(backupdisk):
     """
     Unmount removeable disk, if it fails to unmount then retry 5 times
-    60 seconds apart.  Added due to problems with WD USB3 hard drives
-    that have firmware sleep that cannot be controlled with sg utils,
-    hdparm, sdparm or even writing a file!
+    60 seconds apart, then raise exception.
     """
     unmount_success = False
     retry = 5
@@ -103,13 +98,17 @@ def unmnt_removeable(backupdisk):
 
 
 def export_bds(avbaserver, bdspath, nfsopts):
-    """Export bdspath to avbaserver."""
+    """Export BDS path to Archive VBA."""
     #https://bugzilla.redhat.com/show_bug.cgi?id=966237
     n = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     nfsmounts = [ x.split() for x in n ]
     for item in nfsmounts:
         if item[0] == bdspath:
-            raise ExistingExport('%s is already exported according to showmount -e!' %(bdspath))
+            try:
+                raise ExistingExport('%s is already exported according to showmount -e!' %(bdspath))
+            finally:
+                subprocess.check_call([exportfs, '-r'])
+                logging.warning('Reexport all directories completed.')
     else:
         subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
         logging.info('Exported %s successfully to %s', bdspath, avbaserver)
@@ -117,7 +116,7 @@ def export_bds(avbaserver, bdspath, nfsopts):
 
 
 def unexport_bds(avbaserver, bdspath):
-    """Unexport bdspath to avbaserver."""
+    """Unexport BDS path to Archive VBA."""
     n = subprocess.check_output([showmount, '-e', '--no-headers']).splitlines()
     nfsmounts = [ x.split() for x in n ]
     for item in nfsmounts:
@@ -132,7 +131,7 @@ def unexport_bds(avbaserver, bdspath):
 
 
 def connect_viserver(viserver, username, password):
-    """Connect to viserver and return viauthtoken"""
+    """Connect to vCenter/ESX(i) and return an authtoken."""
     server = VIServer()
     server.connect(viserver, username, password)
     logging.info('Connected to %s successfully', viserver)
@@ -164,9 +163,11 @@ def avba_shutdown(avbaname, viauthtoken):
 
 def get_credentials(username, password, netrcfile, viserver):
     """
-    Returns username and password if set else prompts for username or
-    password if one set without the other else use netrc else prompt for
-    username and password.
+    Order of processing:
+    1 Returns username and password if set.
+    2 Prompts for username or password if one set without the other.
+    3 Use netrc.
+    4 Prompt for username and password.
     """
     if username and password:
          return username, password
@@ -191,6 +192,7 @@ def get_credentials(username, password, netrcfile, viserver):
 
 
 def start(args):
+
     viauthtoken = None
     bdspath = os.path.join(args.backupdisk, args.bdsdir)
     username, password = get_credentials(args.username, args.password, args.netrcfile, args.viserver)

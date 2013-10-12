@@ -40,7 +40,10 @@ def sync_buffers():
 
 
 def wakeup_removeable(backupdisk):
-    """Wake up backupdisk"""
+    """
+    Try to wake up backupdisk using sg_start if it has gone to sleep.
+    Doesn't seem to help on WD USB3 disks.
+    """
     dev = None
     for line in open('/proc/mounts'):
         if line.split()[1] == backupdisk:
@@ -73,9 +76,10 @@ def check_bds(bdspath):
 
 def unmnt_removeable(backupdisk):
     """
-    Unmount backupdisk and retry upon failures which can occur when
-    backupdisk is suspended and nfs still retains locks on disk even
-    though showmount etc. all appear fine.
+    Unmount removeable disk, if it fails to unmount then retry 5 times
+    60 seconds apart.  Added due to problems with WD USB3 hard drives
+    that have firmware sleep that cannot be controlled with sg utils,
+    hdparm, sdparm or even writing a file!
     """
     unmount_success = False
     retry = 5
@@ -86,7 +90,6 @@ def unmnt_removeable(backupdisk):
             try:
                 # may need to put this in stop function alone?  Or
                 # before unexport_bds?
-                wakeup_removeable(backupdisk)
                 subprocess.check_call([umount, backupdisk])
                 logging.info('Unmounted %s successfully.', backupdisk)
                 return
@@ -119,6 +122,8 @@ def unexport_bds(avbaserver, bdspath):
     nfsmounts = [ x.split() for x in n ]
     for item in nfsmounts:
         if item[0] == bdspath:
+            """Give the VBA some time to shutdown before unexporting bds."""
+            time.sleep(30)
             subprocess.check_call([exportfs, '-u', avbaserver + ':' + bdspath])
             logging.info('Unexported %s successfully from %s', bdspath, avbaserver)
             return
@@ -295,6 +300,13 @@ def stop(args):
         raise
 
     try:
+        wakeup_removeable(args.backupdisk)
+    except Exception as e:
+        logging.warning(e)
+        result = False
+        pass
+
+    try:
         avba_shutdown(args.avbaname, viauthtoken)
     except PowerState as e:
         logging.warning(e)
@@ -319,6 +331,7 @@ def stop(args):
             except Exception as unmnt_removeable_e:
                 logging.error(unmnt_removeable_e)
                 pass    
+
 
     try:
         unexport_bds(args.avbaserver, bdspath)
@@ -345,6 +358,7 @@ def stop(args):
         sync_buffers()
     except Exception as e:
         logging.error(e)
+        result = False
         pass
 
     try:

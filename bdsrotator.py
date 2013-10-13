@@ -83,8 +83,6 @@ def unmnt_removeable(backupdisk):
     else:
         while not unmount_success:
             try:
-                # may need to put this in stop function alone?  Or
-                # before unexport_bds?
                 subprocess.check_call([umount, backupdisk])
                 logging.info('Unmounted %s successfully.', backupdisk)
                 return
@@ -107,8 +105,8 @@ def export_bds(avbaserver, bdspath, nfsopts):
             try:
                 raise ExistingExport('%s is already exported according to showmount -e!' %(bdspath))
             finally:
-                subprocess.check_call([exportfs, '-r'])
-                logging.warning('Reexport all directories completed.')
+                subprocess.check_call([exportfs, '-f'])
+                logging.warning('NFS export table flushed.')
     else:
         subprocess.check_call([exportfs, '-o', nfsopts, avbaserver + ':' + bdspath])
         logging.info('Exported %s successfully to %s', bdspath, avbaserver)

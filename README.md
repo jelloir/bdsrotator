@@ -65,6 +65,12 @@ Once installed you also need pysphere which can be installed as follows
 
     pip install -U pysphere
 
+#### NFS Kernel and SG3 Utils
+
+On Debian Wheezy you will need to install nfs and sg2 utils
+
+    apt-get install sg3-utils nfs-kernel-server
+
 Installation
 ------------
 
